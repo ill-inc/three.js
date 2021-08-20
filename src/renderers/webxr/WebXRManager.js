@@ -1,6 +1,7 @@
 import { ArrayCamera } from '../../cameras/ArrayCamera.js';
 import { EventDispatcher } from '../../core/EventDispatcher.js';
 import { PerspectiveCamera } from '../../cameras/PerspectiveCamera.js';
+import { Vector2 } from '../math/Vector2.js';
 import { Vector3 } from '../../math/Vector3.js';
 import { Vector4 } from '../../math/Vector4.js';
 import { WebGLAnimation } from '../webgl/WebGLAnimation.js';
@@ -36,6 +37,9 @@ class WebXRManager extends EventDispatcher {
 
 		const controllers = [];
 		const inputSourcesMap = new Map();
+
+		const currentSize = new Vector2();
+		let currentPixelRatio;
 
 		//
 
@@ -136,6 +140,8 @@ class WebXRManager extends EventDispatcher {
 			_currentDepthFar = null;
 
 			// restore framebuffer/rendering state
+
+			renderer.setDrawingBufferSize( currentSize.width, currentSize.height, currentPixelRatio );
 
 			state.bindXRFramebuffer( null );
 			renderer.setRenderTarget( renderer.getRenderTarget() );
@@ -254,6 +260,8 @@ class WebXRManager extends EventDispatcher {
 
 					session.updateRenderState( { baseLayer: glBaseLayer } );
 
+					renderer.setDrawingBufferSize( glBaseLayer.framebufferWidth, glBaseLayer.framebufferHeight, 1 );
+
 				} else if ( gl instanceof WebGLRenderingContext ) {
 
 					// Use old style webgl layer because we can't use MSAA
@@ -270,6 +278,8 @@ class WebXRManager extends EventDispatcher {
 					glBaseLayer = new XRWebGLLayer( session, gl, layerInit );
 
 					session.updateRenderState( { layers: [ glBaseLayer ] } );
+
+					renderer.setDrawingBufferSize( glBaseLayer.framebufferWidth, glBaseLayer.framebufferHeight, 1 );
 
 				} else {
 
@@ -301,6 +311,8 @@ class WebXRManager extends EventDispatcher {
 					glFramebuffer = gl.createFramebuffer();
 
 					session.updateRenderState( { layers: [ glProjLayer ] } );
+
+					renderer.setDrawingBufferSize( glProjLayer.textureWidth, glProjLayer.textureHeight, 1 );
 
 					if ( isMultisample ) {
 
@@ -334,6 +346,9 @@ class WebXRManager extends EventDispatcher {
 				}
 
 				referenceSpace = await session.requestReferenceSpace( referenceSpaceType );
+
+				currentPixelRatio = renderer.getPixelRatio();
+				renderer.getSize( currentSize );
 
 				animation.setContext( session );
 				animation.start();
