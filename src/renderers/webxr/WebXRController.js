@@ -21,6 +21,7 @@ class WebXRController {
 			this._hand.matrixAutoUpdate = false;
 			this._hand.visible = false;
 
+			this._hand.handedness = null;
 			this._hand.joints = {};
 			this._hand.inputState = { pinching: false };
 
@@ -168,6 +169,7 @@ class WebXRController {
 			if ( hand && inputSource.hand ) {
 
 				handPose = true;
+				hand.handedness = inputSource.handedness;
 
 				for ( const inputjoint of inputSource.hand.values() ) {
 
