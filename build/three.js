@@ -12546,7 +12546,14 @@
 				runnable = false;
 				const vertexErrors = getShaderErrors(gl, glVertexShader, 'vertex');
 				const fragmentErrors = getShaderErrors(gl, glFragmentShader, 'fragment');
-				console.error('THREE.WebGLProgram: Shader Error ' + gl.getError() + ' - ' + 'VALIDATE_STATUS ' + gl.getProgramParameter(program, gl.VALIDATE_STATUS) + '\n\n' + 'Program Info Log: ' + programLog + '\n' + vertexErrors + '\n' + fragmentErrors);
+				const glError = gl.getError();
+				const validateStatus = gl.getProgramParameter(program, gl.VALIDATE_STATUS);
+				const error = 'THREE.WebGLProgram: Shader Error ' + glError + ' - ' + 'VALIDATE_STATUS ' + validateStatus + '\n\n' + 'Program Info Log: ' + programLog + '\n' + vertexErrors + '\n' + fragmentErrors;
+				if (renderer.debug.checkShaderErrors instanceof Function) {
+					renderer.debug.checkShaderErrors(error, glError, validateStatus, programLog, vertexErrors, fragmentErrors);
+				} else {
+					console.error(error);
+				}
 			} else if (programLog !== '') {
 				console.warn('THREE.WebGLProgram: Program Info Log:', programLog);
 			} else if (vertexLog === '' || fragmentLog === '') {
